@@ -367,6 +367,18 @@
               window.fcWidget.user.setProperties({
                 name: name,
                 email: email
+                // Monitora quando o widget carregar
+const checkInterval = setInterval(() => {
+  if (window.fcWidget && window.fcWidget.isLoaded && window.fcWidget.isLoaded()) {
+    clearInterval(checkInterval);
+    
+    // Force update user data
+    window.fcWidget.user.update({
+      name: name,
+      email: email
+    });
+  }
+}, 1000);
               });
             }
             
