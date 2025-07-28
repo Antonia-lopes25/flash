@@ -3,30 +3,421 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Site Simples com Chat</title>
+  <title>Site com Chat Integrado</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       padding: 40px;
       background-color: #f4f4f4;
       text-align: center;
     }
+    
     h1 {
       color: #333;
+      margin-bottom: 20px;
     }
+    
     p {
       color: #666;
+      margin-bottom: 30px;
+    }
+    
+    /* Estilos para o modal customizado do chat */
+    .fc-custom-form-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999999;
+      animation: fadeIn 0.3s ease-out;
+    }
+    
+    .fc-custom-form-modal {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 380px;
+      max-width: calc(100vw - 40px);
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 5px 40px rgba(0, 0, 0, 0.16);
+      overflow: hidden;
+      animation: slideUp 0.3s ease-out;
+    }
+    
+    @media (max-width: 480px) {
+      .fc-custom-form-modal {
+        bottom: 0;
+        right: 0;
+        left: 0;
+        width: 100%;
+        max-width: 100%;
+        border-radius: 16px 16px 0 0;
+      }
+    }
+    
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+    
+    @keyframes slideUp {
+      from {
+        transform: translateY(100px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    
+    .fc-form-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 20px;
+      text-align: right;
+    }
+    
+    .fc-form-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+    
+    .fc-form-close:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .fc-form-body {
+      padding: 30px;
+      text-align: center;
+    }
+    
+    .fc-form-logo {
+      width: 60px;
+      height: 60px;
+      margin: 0 auto 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 30px;
+      font-weight: bold;
+    }
+    
+    .fc-form-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    
+    .fc-form-subtitle {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 30px;
+      line-height: 1.5;
+    }
+    
+    .fc-form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    
+    .fc-form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    
+    .fc-form-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      background: #fafafa;
+    }
+    
+    .fc-form-input:focus {
+      outline: none;
+      border-color: #667eea;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .fc-form-input::placeholder {
+      color: #999;
+    }
+    
+    .fc-form-submit {
+      width: 100%;
+      padding: 14px 24px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 10px;
+    }
+    
+    .fc-form-submit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .fc-form-submit:active {
+      transform: translateY(0);
+    }
+    
+    .fc-form-error {
+      color: #dc3545;
+      font-size: 13px;
+      margin-top: 5px;
+      display: none;
+    }
+    
+    /* Botão flutuante do chat */
+    .custom-chat-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 50%;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      z-index: 999998;
+    }
+    
+    .custom-chat-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .custom-chat-button svg {
+      width: 30px;
+      height: 30px;
+      fill: white;
     }
   </style>
 </head>
 <body>
   <h1>Bem-vindo ao nosso site!</h1>
-  <p>Este é um site simples com o chat inserido.</p>
+  <p>Este é um site com chat integrado. Clique no botão no canto inferior direito para iniciar.</p>
+  
+  <!-- Botão flutuante customizado -->
+  <div class="custom-chat-button" onclick="openCustomForm()">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+    </svg>
+  </div>
+  
+  <!-- Modal do formulário customizado -->
+  <div class="fc-custom-form-overlay" id="customFormOverlay" onclick="closeFormOverlay(event)">
+    <div class="fc-custom-form-modal" onclick="event.stopPropagation()">
+      <div class="fc-form-header">
+        <button class="fc-form-close" onclick="closeCustomForm()">✕</button>
+      </div>
+      <div class="fc-form-body">
+        <div class="fc-form-logo">💬</div>
+        <h2 class="fc-form-title">Popping Compass</h2>
+        <p class="fc-form-subtitle">Informe seus dados abaixo<br>antes de iniciar o atendimento.</p>
+        
+        <form id="chatUserForm" onsubmit="submitChatForm(event)">
+          <div class="fc-form-group">
+            <label class="fc-form-label">Nome</label>
+            <input 
+              type="text" 
+              class="fc-form-input" 
+              id="userName" 
+              placeholder="Coloque aqui seu NOME"
+              required
+            />
+            <div class="fc-form-error" id="nameError">Por favor, digite seu nome</div>
+          </div>
+          
+          <div class="fc-form-group">
+            <label class="fc-form-label">Email</label>
+            <input 
+              type="email" 
+              class="fc-form-input" 
+              id="userEmail" 
+              placeholder="exemplo@exemplo.com"
+              required
+            />
+            <div class="fc-form-error" id="emailError">Por favor, digite um email válido</div>
+          </div>
+          
+          <button type="submit" class="fc-form-submit">Iniciar Conversa</button>
+        </form>
+      </div>
+    </div>
+  </div>
 
-  <!-- Script do chat -->
-<script
-src='//fw-cdn.com/13802480/5760511.js'
-chat='true'>
-</script>
+  <script>
+    let isFormSubmitted = false;
+    let userData = null;
+    
+    function openCustomForm() {
+      if (isFormSubmitted && window.fcWidget) {
+        // Se já preencheu o formulário, apenas abre o chat
+        window.fcWidget.open();
+      } else {
+        // Mostra o formulário
+        document.getElementById('customFormOverlay').style.display = 'block';
+      }
+    }
+    
+    function closeCustomForm() {
+      document.getElementById('customFormOverlay').style.display = 'none';
+    }
+    
+    function closeFormOverlay(event) {
+      if (event.target.id === 'customFormOverlay') {
+        closeCustomForm();
+      }
+    }
+    
+    function validateEmail(email) {
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(email);
+    }
+    
+    function submitChatForm(event) {
+      event.preventDefault();
+      
+      const name = document.getElementById('userName').value.trim();
+      const email = document.getElementById('userEmail').value.trim();
+      const nameError = document.getElementById('nameError');
+      const emailError = document.getElementById('emailError');
+      
+      // Reset errors
+      nameError.style.display = 'none';
+      emailError.style.display = 'none';
+      
+      let hasError = false;
+      
+      if (!name) {
+        nameError.style.display = 'block';
+        hasError = true;
+      }
+      
+      if (!email || !validateEmail(email)) {
+        emailError.style.display = 'block';
+        hasError = true;
+      }
+      
+      if (hasError) return;
+      
+      // Salva os dados do usuário
+      userData = { name, email };
+      isFormSubmitted = true;
+      
+      // Fecha o formulário
+      closeCustomForm();
+      
+      // Carrega o Flashchat com os dados do usuário
+      loadFlashchatWithUserData(name, email);
+    }
+    
+    function loadFlashchatWithUserData(name, email) {
+      // Remove o botão customizado
+      document.querySelector('.custom-chat-button').style.display = 'none';
+      
+      // Configura as variáveis globais ANTES de carregar o script
+      window.fcSettings = {
+        name: name,
+        email: email,
+        onLoad: function() {
+          // Callback quando o chat carregar
+          if (window.fcWidget) {
+            // Tenta definir as propriedades do usuário
+            if (typeof window.fcWidget.user !== 'undefined' && typeof window.fcWidget.user.setProperties === 'function') {
+              window.fcWidget.user.setProperties({
+                name: name,
+                email: email
+              });
+            }
+            
+            // Tenta identificar o usuário
+            if (typeof window.fcWidget.identify === 'function') {
+              window.fcWidget.identify({
+                name: name,
+                email: email,
+                externalId: email
+              });
+            }
+            
+            // Abre o chat automaticamente
+            setTimeout(() => {
+              window.fcWidget.open();
+            }, 500);
+          }
+        }
+      };
+      
+      // Alternativa: Define window.fcUser
+      window.fcUser = {
+        name: name,
+        email: email,
+        externalId: email
+      };
+      
+      // Carrega o script do Flashchat
+      const script = document.createElement('script');
+      script.src = '//fw-cdn.com/13725213/5714127.js';
+      script.setAttribute('chat', 'true');
+      
+      // Adiciona atributos de dados
+      script.setAttribute('data-name', name);
+      script.setAttribute('data-email', email);
+      
+      document.body.appendChild(script);
+    }
+    
+    // Adiciona validação em tempo real
+    document.getElementById('userName').addEventListener('input', function() {
+      if (this.value.trim()) {
+        document.getElementById('nameError').style.display = 'none';
+      }
+    });
+    
+    document.getElementById('userEmail').addEventListener('input', function() {
+      if (validateEmail(this.value.trim())) {
+        document.getElementById('emailError').style.display = 'none';
+      }
+    });
+  </script>
 </body>
 </html>
